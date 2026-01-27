@@ -63,16 +63,6 @@ jobs:
           az bicep upgrade
           az bicep version
 
-      - name: Build Bicep to ARM
-        run: |
-          echo "Compiling Bicep to ARM JSON..."
-          az bicep build --file main.bicep --outfile main.json
-          echo "Bicep compiled successfully!"
-
-      - name: Ensure Resource Group Exists
-        run: |
-          echo "Resource group will be created by subscription-level deployment"
-
       - name: Deploy Infrastructure
         id: deploy
         run: |
@@ -81,10 +71,9 @@ jobs:
           
           az deployment sub create \
             --location "${{ env.AZURE_LOCATION }}" \
-            --template-file main.json \
+            --template-file main.bicep \
             --parameters environments/dev.bicepparam \
-            --name "$DEPLOYMENT_NAME" \
-            --no-prompt true
+            --name "$DEPLOYMENT_NAME"
 
 
   cleanup-on-pr:
