@@ -1,0 +1,23 @@
+# Build artifacts - Bicep compiled files
+*.json
+!parameters/*.json
+
+# Azure CLI/PowerShell artifacts
+*.log
+
+# IDE files
+.vscode/
+.vs/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Deployment outputs
+outputs/

@@ -1,0 +1,105 @@
+name: Deploy Azure Databricks Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'bicep/**'
+      - 'parameters/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'bicep/**'
+      - 'parameters/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  AZURE_RESOURCE_GROUP_DEV: 'joachim_test'
+  AZURE_RESOURCE_GROUP_PROD: 'joachim_test'
+  AZURE_LOCATION: 'westeurope'
+
+jobs:
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: development
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login with Service Principal
+        uses: azure/login@v1
+        with:
+          creds: '{"clientId":"${{ secrets.APPLICATIONCLIENTID }}","clientSecret":"${{ secrets.SECRETID }}","subscriptionId":"${{ secrets.SUBSCRIPTIONID }}","tenantId":"${{ secrets.APPLICATIONTENANTID }}"}'
+
+      - name: Verify Azure Connection
+        run: |
+          echo "Testing Azure connection..."
+          az account show
+          echo "Connection successful!"
+
+      - name: Upgrade Bicep CLI
+        run: |
+          echo "Upgrading Bicep CLI to latest version..."
+          az bicep upgrade
+          az bicep version
+
+      - name: Build Bicep to ARM
+        run: |
+          echo "Compiling Bicep to ARM JSON..."
+          az bicep build --file bicep/main.bicep --outfile bicep/main.json
+          echo "Bicep compiled successfully!"
+
+      - name: Ensure Resource Group Exists
+        run: |
+          # Create resource group if it doesn't exist (idempotent)
+          az group create \
+            --name ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --tags Environment=dev Project=Databricks Owner="${{ github.actor }}"
+
+      - name: Deploy Infrastructure
+        id: deploy
+        run: |
+          DEPLOYMENT_NAME="deploy-$(date +%Y%m%d-%H%M%S)"
+          echo "deployment-name=$DEPLOYMENT_NAME" >> $GITHUB_OUTPUT
+          
+          az deployment group create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+            --template-file bicep/main.json \
+            --parameters @parameters/dev.parameters.json \
+            --name "$DEPLOYMENT_NAME" \
+            --mode Incremental \
+            --no-prompt true
+
+
+  cleanup-on-pr:
+    name: Cleanup Dev Resources on PR Close
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    
+    steps:
+      - name: Azure Login with Service Principal
+        uses: azure/login@v1
+        with:
+          creds: '{"clientId":"${{ secrets.APPLICATIONCLIENTID }}","clientSecret":"${{ secrets.SECRETID }}","subscriptionId":"${{ secrets.SUBSCRIPTIONID }}","tenantId":"${{ secrets.APPLICATIONTENANTID }}"}'
+
+      - name: Cleanup PR Resources
+        run: |
+          # Optional: Clean up temporary resources created for PR validation
+          echo "PR closed - cleanup can be implemented here if needed"
