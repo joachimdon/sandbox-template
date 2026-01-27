@@ -1,4 +1,4 @@
-name: Deploy Azure Databricks Infrastructure
+name: Deploy Azure Infrastructure as Code
 
 on:
   push:
@@ -25,11 +25,13 @@ on:
         options:
           - dev
           - prod
+          - test
 
 env:
-  AZURE_RESOURCE_GROUP_DEV: 'joachim_test'
-  AZURE_RESOURCE_GROUP_PROD: 'joachim_test'
-  AZURE_LOCATION: 'westeurope'
+  AZURE_RESOURCE_GROUP_DEV: 'rg-aa387-sandbox'
+  AZURE_RESOURCE_GROUP_PROD: 'rg-aa387-sandbox'
+  AZURE_RESOURCE_GROUP_TEST: 'rg-aa387-sandbox'
+  AZURE_LOCATION: 'norwayeast'
 
 jobs:
   deploy-dev:
