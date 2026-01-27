@@ -1,4 +1,4 @@
-targetScope = '84c48339-1e4d-4273-b835-0b38f4090f76' 
+targetScope = 'subscription' 
 
 param projectName string
 param location string
