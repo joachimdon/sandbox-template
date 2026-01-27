@@ -6,15 +6,17 @@ on:
       - main
       - develop
     paths:
-      - 'bicep/**'
-      - 'parameters/**'
+      - '*.bicep'
+      - 'modules/**'
+      - 'environments/**'
       - '.github/workflows/**'
   pull_request:
     branches:
       - main
     paths:
-      - 'bicep/**'
-      - 'parameters/**'
+      - '*.bicep'
+      - 'modules/**'
+      - 'environments/**'
   workflow_dispatch:
     inputs:
       environment:
@@ -64,16 +66,12 @@ jobs:
       - name: Build Bicep to ARM
         run: |
           echo "Compiling Bicep to ARM JSON..."
-          az bicep build --file bicep/main.bicep --outfile bicep/main.json
+          az bicep build --file main.bicep --outfile main.json
           echo "Bicep compiled successfully!"
 
       - name: Ensure Resource Group Exists
         run: |
-          # Create resource group if it doesn't exist (idempotent)
-          az group create \
-            --name ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
-            --location "${{ env.AZURE_LOCATION }}" \
-            --tags Environment=dev Project=Databricks Owner="${{ github.actor }}"
+          echo "Resource group will be created by subscription-level deployment"
 
       - name: Deploy Infrastructure
         id: deploy
@@ -81,12 +79,11 @@ jobs:
           DEPLOYMENT_NAME="deploy-$(date +%Y%m%d-%H%M%S)"
           echo "deployment-name=$DEPLOYMENT_NAME" >> $GITHUB_OUTPUT
           
-          az deployment group create \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
-            --template-file bicep/main.json \
-            --parameters @parameters/dev.parameters.json \
+          az deployment sub create \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --template-file main.json \
+            --parameters environments/dev.bicepparam \
             --name "$DEPLOYMENT_NAME" \
-            --mode Incremental \
             --no-prompt true
 
 
