@@ -77,11 +77,11 @@ param defaultNsgRules = [
 
 param vnetParam = {
   name: 'vnet-${projectName}-${environment}'
-  addressPrefixes: [''] //['10.0.0.0/26'] Change ip address
+  addressPrefixes: ['10.242.24.0/22'] //['10.0.0.0/26'] Change ip address
   subnets: [
     {
-      name: 'snet-**-${environment}' // Change name
-      addressPrefixes: ['']//['10.0.0.0/28'] Change ip address
+      name: 'snet-app-${environment}' // Change name
+      addressPrefixes: ['10.242.24.0/27']//['10.0.0.0/28'] Change ip address
       securityRules: [
         //Example nsg rule
         /*  {
