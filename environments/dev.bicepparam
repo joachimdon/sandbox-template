@@ -5,9 +5,6 @@ param location = 'norwayeast'
 param environment = 'dev'
 param customerCode = 'XX'
 
-param managementSubId = '84c48339-1e4d-4273-b835-0b38f4090f76'
-param connectivitySubId = '84c48339-1e4d-4273-b835-0b38f4090f76'
-
 // Adjust tags
 param intilityManaged = 'false'
 param intilityMonitored = 'false'

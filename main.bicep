@@ -1,15 +1,9 @@
-targetScope = 'subscription'
+targetScope = 'resourceGroup'
 
 param projectName string
 param location string
 param environment string
 param customerCode string
-
-//xx-management subscription id
-param managementSubId string
-//xx-connectivity subscription id 
-param connectivitySubId string
-param rgPrivateDnsName string = 'rg-platform-dns'
 
 //tagging
 param intilityManaged string
@@ -33,27 +27,44 @@ param vnetParam object
 param virtualLinkList array
 param defaultNsgRules array
 
-resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
-  name: 'rg-${projectName}-${environment}'
+// Create NSGs for each subnet
+resource nsgs 'Microsoft.Network/networkSecurityGroups@2023-11-01' = [for (subnet, i) in vnetParam.subnets: {
+  name: 'nsg-${subnet.name}'
   location: location
   tags: tags
-}
+  properties: {
+    securityRules: union(defaultNsgRules, subnet.securityRules)
+  }
+}]
 
-module vnet 'br:crpclazmodules.azurecr.io/ptn/virtual-network:0.1.10' = {
-  name: 'vnet-deploy'
-  scope: subscription()
-  params: {
-    name: vnetParam.name
-    location: location
-    tags: tags
-    rgName: rg.name
-    customerCode: customerCode
-    addressPrefixes: vnetParam.addressPrefixes
-    subnets: vnetParam.subnets
-    platformSubId: managementSubId
-    virtualLinkList: virtualLinkList
-    defaultNsgRules: defaultNsgRules
-    rgPrivateDnsName: rgPrivateDnsName
-    subPrivateDnsString: connectivitySubId
+// Create Virtual Network
+resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
+  name: vnetParam.name
+  location: location
+  tags: tags
+  properties: {
+    addressSpace: {
+      addressPrefixes: vnetParam.addressPrefixes
+    }
+    subnets: [for (subnet, i) in vnetParam.subnets: {
+      name: subnet.name
+      properties: {
+        addressPrefixes: subnet.addressPrefixes
+        networkSecurityGroup: {
+          id: nsgs[i].id
+        }
+        serviceEndpoints: subnet.serviceEndpoints
+        delegations: !empty(subnet.delegation) ? [
+          {
+            name: subnet.delegation
+            properties: {
+              serviceName: subnet.delegation
+            }
+          }
+        ] : []
+        privateEndpointNetworkPolicies: subnet.privateEndpointNetworkPolicies
+        privateLinkServiceNetworkPolicies: subnet.privateLinkServiceNetworkPolicies
+      }
+    }]
   }
 }
