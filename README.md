@@ -68,14 +68,15 @@ env:
   AZURE_LOCATION: 'norwayeast'                     # Your Azure region
 ```
 
-#### 2.3 Commit and push your changes
+### 2.3 Commit and push your changes
 
 ```bash
 git add .
 git commit -m "Configure for my environment"
 git push
+```
 
-### 3. Add GitHub Secrets
+#### 3. Add GitHub Secrets
 
 You'll need a service principal with Contributor access to your Azure resource group.
 
