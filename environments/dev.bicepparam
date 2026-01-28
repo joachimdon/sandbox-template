@@ -1,9 +1,12 @@
 using '../main.bicep'
 
-param projectName = 'Template'
+param projectName = 'Sandbox'
 param location = 'norwayeast'
 param environment = 'dev'
 param customerCode = 'XX'
+
+param managementSubId = '84c48339-1e4d-4273-b835-0b38f4090f76'
+param connectivitySubId = '84c48339-1e4d-4273-b835-0b38f4090f76'
 
 // Adjust tags
 param intilityManaged = 'false'
@@ -80,7 +83,7 @@ param vnetParam = {
   addressPrefixes: [''] //['10.0.0.0/26'] Change ip address
   subnets: [
     {
-      name: 'snet-*****-${environment}' // Change name
+      name: 'snet-**-${environment}' // Change name
       addressPrefixes: ['']//['10.0.0.0/28'] Change ip address
       securityRules: [
         //Example nsg rule

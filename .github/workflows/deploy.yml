@@ -69,10 +69,11 @@ jobs:
           DEPLOYMENT_NAME="deploy-$(date +%Y%m%d-%H%M%S)"
           echo "deployment-name=$DEPLOYMENT_NAME" >> $GITHUB_OUTPUT
           
-          az deployment group create \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP_DEV }} \
+          az deployment sub create \
+            --location "${{ env.AZURE_LOCATION }}" \
             --template-file main.bicep \
             --parameters environments/dev.bicepparam \
+            --name "$DEPLOYMENT_NAME"
             --name "$DEPLOYMENT_NAME"
 
 
