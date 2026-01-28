@@ -108,5 +108,38 @@ param vnetParam = {
       privateLinkServiceNetworkPolicies: 'Enabled'
       routeTableRoutes: []
     }
+    {
+      name: 'snet-db-${environment}' // Change name
+      addressPrefixes: ['10.242.24.64/27'] //['10.0.0.0/28'] Change ip address
+      securityRules: [ //Example nsg rule
+        /*  {
+          name: 'AllowCidrBlockCustomAnyInbound'
+          properties: {
+            description: 'AllowCidrBlockCustomAnyInbound'
+            protocol: '*'
+            sourcePortRange: '*'
+            destinationPortRange: '*'
+            sourceAddressPrefix: ''
+            destinationAddressPrefix: ''
+            access: 'Allow'
+            priority: 100
+            direction: 'Inbound'
+            sourcePortRanges: []
+            destinationPortRanges: []
+            sourceAddressPrefixes: [
+              ''
+              ''
+            ]
+            destinationAddressPrefixes: []
+          }
+        }
+        */]
+      serviceEndpoints: []
+      delegation: ''
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      routeTableRoutes: []
+    }
   ]
+
 }

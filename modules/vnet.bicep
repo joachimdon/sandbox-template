@@ -19,6 +19,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
   name: vnetParam.name
   location: location
   tags: tags
+  dependsOn: [
+    nsgs
+  ]
   properties: {
     addressSpace: {
       addressPrefixes: vnetParam.addressPrefixes
