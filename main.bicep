@@ -1,4 +1,4 @@
-targetScope = 'subscription' 
+targetScope = 'resourceGroup' 
 
 param projectName string
 param location string
@@ -21,7 +21,7 @@ param deploymentModel string
 param IntilityImplementationGuid string
 param deployer string
 
-var tags object = {
+var tags = {
   intilityManaged: intilityManaged
   intilityMonitored: intilityMonitored
   intilityBackup: intilityBackup
@@ -34,21 +34,16 @@ var tags object = {
 param vnetParam object
 param virtualLinkList array
 param defaultNsgRules array
-
-
-resource rg 'Microsoft.Resources/resourceGroups@2025-04-01' = {
-  name: 'rg-${projectName}-${environment}'
-  location: location
-  tags: tags
-}
+param rgName string
 
 module vnet 'br:crpclazmodules.azurecr.io/ptn/virtual-network:0.1.10' = {
   name: 'vnet-deploy'
+  scope: subscription()
   params: {
     name: vnetParam.name
     location: location
     tags: tags
-    rgName: rg.name
+    rgName: rgName
     customerCode: customerCode
     addressPrefixes: vnetParam.addressPrefixes
     subnets: vnetParam.subnets
