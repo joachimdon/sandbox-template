@@ -1,6 +1,6 @@
 using '../main.bicep'
 
-param projectName = 'Sandbox'
+param projectName = 'sandbox'
 param location = 'norwayeast'
 param environment = 'dev'
 param customerCode = 'XX'
@@ -12,11 +12,6 @@ param intilityBackup = 'false'
 param deploymentModel = 'IAC'
 param IntilityImplementationGuid = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' // Set Guid
 param deployer = 'Intility'
-
-//DNS sones will be linked to the vnet
-param virtualLinkList = [
-  //'privatelink.azurewebsites.net'
-]
 
 param defaultNsgRules = [
   {

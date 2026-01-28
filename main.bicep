@@ -24,47 +24,17 @@ var tags = {
 
 //networking
 param vnetParam object
-param virtualLinkList array
 param defaultNsgRules array
 
-// Create NSGs for each subnet
-resource nsgs 'Microsoft.Network/networkSecurityGroups@2023-11-01' = [for (subnet, i) in vnetParam.subnets: {
-  name: 'nsg-${subnet.name}'
-  location: location
-  tags: tags
-  properties: {
-    securityRules: union(defaultNsgRules, subnet.securityRules)
-  }
-}]
 
-// Create Virtual Network
-resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
-  name: vnetParam.name
+// create vnet
+module vnetModule 'modules/vnet.bicep' = {
+  name:'vnet-${projectName}-${environment}'
+params: {
   location: location
   tags: tags
-  properties: {
-    addressSpace: {
-      addressPrefixes: vnetParam.addressPrefixes
-    }
-    subnets: [for (subnet, i) in vnetParam.subnets: {
-      name: subnet.name
-      properties: {
-        addressPrefixes: subnet.addressPrefixes
-        networkSecurityGroup: {
-          id: nsgs[i].id
-        }
-        serviceEndpoints: subnet.serviceEndpoints
-        delegations: !empty(subnet.delegation) ? [
-          {
-            name: subnet.delegation
-            properties: {
-              serviceName: subnet.delegation
-            }
-          }
-        ] : []
-        privateEndpointNetworkPolicies: subnet.privateEndpointNetworkPolicies
-        privateLinkServiceNetworkPolicies: subnet.privateLinkServiceNetworkPolicies
-      }
-    }]
+  vnetParam: vnetParam
+  defaultNsgRules: defaultNsgRules
   }
-}
+} 
+
