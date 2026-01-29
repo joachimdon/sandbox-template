@@ -71,6 +71,7 @@ param defaultNsgRules = [
   }
 ]
 
+// Define VNet and Subnet parameters
 param vnetParam = {
   name: 'vnet-${projectName}-${environment}'
   addressPrefixes: ['10.242.24.0/22'] //['10.0.0.0/26'] Change ip address

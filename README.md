@@ -7,7 +7,7 @@ A GitHub template for deploying Azure infrastructure using Bicep with Azure Veri
 - **Subscription-scoped deployment** - Deploy resource groups and resources across subscriptions
 - **Azure Verified Modules (AVM)** - Uses official Microsoft modules for Virtual Network
 - **Multi-environment support** - Separate parameter files for dev, test, and prod
-- **Automated CI/CD** - GitHub Actions workflow with manual and automatic triggers
+- **Automated CI/CD** - GitHub Actions workflow with manual triggers
 
 ## 📋 Prerequisites
 
@@ -23,7 +23,7 @@ A GitHub template for deploying Azure infrastructure using Bicep with Azure Veri
 2. Choose a name for your new repository
 3. Click **"Create repository from template"**
 
-### 2. Clone and Configure
+### 2. Clone and Configure (VSCode)
 
 #### 2.1 Clone Your Repository
 
@@ -53,18 +53,77 @@ param deployer = 'YourName'
 
 // Configure VNet
 param vnetParam = {
-  addressPrefixes: ['10.0.0.0/16']                        // Your IP range
+  name: 'vnet-${projectName}-${environment}'
+  addressPrefixes: ['10.242.24.0/22'] //['10.0.0.0/26'] Change ip address
   subnets: [
     {
-      name: 'snet-app-${environment}'
-      addressPrefixes: ['10.0.0.0/24']                    // Subnet range
-      securityRules: []
+      name: 'snet-app-${environment}' // Change name
+      addressPrefixes: ['10.242.24.0/27']//['10.0.0.0/28'] Change ip address
+      securityRules: [
+        //Example nsg rule
+        /*  {
+          name: 'AllowCidrBlockCustomAnyInbound'
+          properties: {
+            description: 'AllowCidrBlockCustomAnyInbound'
+            protocol: '*'
+            sourcePortRange: '*'
+            destinationPortRange: '*'
+            sourceAddressPrefix: ''
+            destinationAddressPrefix: ''
+            access: 'Allow'
+            priority: 100
+            direction: 'Inbound'
+            sourcePortRanges: []
+            destinationPortRanges: []
+            sourceAddressPrefixes: [
+              ''
+              ''
+            ]
+            destinationAddressPrefixes: []
+          }
+        }
+        */
+      ]
       serviceEndpoints: []
       delegation: ''
       privateEndpointNetworkPolicies: 'Enabled'
       privateLinkServiceNetworkPolicies: 'Enabled'
+      routeTableRoutes: []
+    }
+    {
+      name: 'snet-db-${environment}' // Change name
+      addressPrefixes: ['10.242.24.64/27'] //['10.0.0.0/28'] Change ip address
+      securityRules: [ //Example nsg rule
+        /*  {
+          name: 'AllowCidrBlockCustomAnyInbound'
+          properties: {
+            description: 'AllowCidrBlockCustomAnyInbound'
+            protocol: '*'
+            sourcePortRange: '*'
+            destinationPortRange: '*'
+            sourceAddressPrefix: ''
+            destinationAddressPrefix: ''
+            access: 'Allow'
+            priority: 100
+            direction: 'Inbound'
+            sourcePortRanges: []
+            destinationPortRanges: []
+            sourceAddressPrefixes: [
+              ''
+              ''
+            ]
+            destinationAddressPrefixes: []
+          }
+        }
+        */]
+      serviceEndpoints: []
+      delegation: ''
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      routeTableRoutes: []
     }
   ]
+
 }
 ```
 
@@ -117,7 +176,7 @@ Your service principal needs **Contributor** role at the **subscription level**.
 ### 4. Deploy
 
 **Option A: Manual trigger**
-
+***In your Github Repository***
 1. Go to **Actions** tab
 2. Select **"Deploy Azure Infrastructure as Code"**
 3. Click **"Run workflow"**
