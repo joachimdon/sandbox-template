@@ -34,18 +34,14 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' existing 
   name: 'rg-aa387-sandbox'
 }
 
-// Deploy VNet module
-
-module vnet 'br:crpclazmodules.azurecr.io/ptn/virtual-network:0.2.0' = {
-  name: 'vnet-pcl-deploy'
+module vnet 'br/public:avm/res/network/virtual-network:0.7.2' = {
+  scope: resourceGroup
+  name: 'vnet-deploy'
   params: {
     name: 'vnet-${projectName}-${environment}'
-    location: location
-    tags: {}
     addressPrefixes: vnetParam.addressPrefixes
-    customerCode: customerCode
-    platformSubId: portfolioSubscriptionId
-    rgName: resourceGroup.name
+    subnets: vnetParam.subnets
+    tags: tags
   }
 }
 
