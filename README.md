@@ -175,7 +175,7 @@ Your service principal needs **Contributor** role at the **subscription level**.
 
 ### 4. Deploy
 
-**Option A: Manual trigger**
+**Manual trigger**
 ***In your Github Repository***
 1. Go to **Actions** tab
 2. Select **"Deploy Azure Infrastructure as Code"**
@@ -186,7 +186,7 @@ Your service principal needs **Contributor** role at the **subscription level**.
 **Monitor deployment:**
 - Go to the **Actions** tab to see the workflow progress
 - Click on the running workflow to see detailed logs
-- Deployment typically takes 1-2 minutes
+- Deployment typically takes a couple of minutes
 
 
 ## 📁 Repository Structure
