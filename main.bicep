@@ -27,18 +27,7 @@ var tags = {
 param vnetParam object
 param defaultNsgRules array
 
-// create vnet
-// module vnetModule 'modules/vnet.bicep' = {
-//   name: 'vnet-${projectName}-${environment}'
-//   params: {
-//     location: location
-//     tags: tags
-//     vnetParam: vnetParam
-//     defaultNsgRules: defaultNsgRules
-//   }
-// }
-
-//existing resource group
+// Create resource group reference
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' existing = {
   scope: subscription(portfolioSubscriptionId)
@@ -56,7 +45,7 @@ module vnet 'br/public:avm/res/network/virtual-network:0.7.2' = {
   }
 }
 
-
+// Deploy Key Vault module
 
 module keyVault 'br:crpclazmodules.azurecr.io/res/key-vault/vault:0.1.0' =  {
   scope: resourceGroup
