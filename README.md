@@ -1,8 +1,21 @@
 # Azure Infrastructure Template - Bicep
 
-A GitHub template for deploying Azure infrastructure with Bicep modules and automated GitHub Actions deployment.
+A GitHub template for deploying Azure infrastructure using Bicep with Azure Verified Modules (AVM), and automated GitHub Actions deployment.
 
-## Getting Started
+## 🚀 Features
+
+- **Subscription-scoped deployment** - Deploy resource groups and resources across subscriptions
+- **Azure Verified Modules (AVM)** - Uses official Microsoft modules for Virtual Network
+- **Multi-environment support** - Separate parameter files for dev, test, and prod
+- **Automated CI/CD** - GitHub Actions workflow with manual and automatic triggers
+
+## 📋 Prerequisites
+
+- Azure subscription with an existing resource group
+- Service principal with **Contributor** role at **subscription level**
+- GitHub repository (created from this template)
+
+## 🔧 Getting Started
 
 ### 1. Create Your Repository
 
@@ -10,7 +23,7 @@ A GitHub template for deploying Azure infrastructure with Bicep modules and auto
 2. Choose a name for your new repository
 3. Click **"Create repository from template"**
 
-### 2. Configure Your Deployment
+### 2. Clone and Configure
 
 #### 2.1 Clone Your Repository
 
@@ -18,57 +31,68 @@ A GitHub template for deploying Azure infrastructure with Bicep modules and auto
 git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
 cd YOUR-REPO-NAME
 ```
-#### 2.2
+
+#### 2.2 Update Configuration
 
 **Edit `environments/dev.bicepparam`:**
 
-Update these values for your environment:
-
 ```bicep
-param projectName = 'yourproject'        // Your project name
-param location = 'norwayeast'            // Your Azure region
-param customerCode = 'ABC'               // Your organization code
+param projectName = 'yourproject'                          // Your project name
+param location = 'norwayeast'                              // Azure region
+param environment = 'dev'
+param customerCode = 'XX'                                  // Your org code
+param portfolioSubscriptionId = 'your-subscription-id'     // Target subscription
 
-// Update VNet configuration
+// Update tags
+param intilityManaged = 'true'
+param intilityMonitored = 'true'
+param intilityBackup = 'false'
+param deploymentModel = 'IAC'
+param IntilityImplementationGuid = 'your-guid-here'
+param deployer = 'YourName'
+
+// Configure VNet
 param vnetParam = {
-  name: 'vnet-yourproject-dev'
-  addressPrefixes: ['10.0.0.0/16']      // Your IP address range
+  addressPrefixes: ['10.0.0.0/16']                        // Your IP range
   subnets: [
     {
-      name: 'snet-app-dev'
-      addressPrefixes: ['10.0.0.0/24']   // Your subnet range
+      name: 'snet-app-${environment}'
+      addressPrefixes: ['10.0.0.0/24']                    // Subnet range
+      securityRules: []
+      serviceEndpoints: []
       delegation: ''
       privateEndpointNetworkPolicies: 'Enabled'
       privateLinkServiceNetworkPolicies: 'Enabled'
-      routeTableRoutes: []
-      securityRules: []
-      serviceEndpoints: []
-    }
-    {
-      name: 'snet-db-dev'
-      addressPrefixes: ['10.0.0.0/24']   // Your subnet range
-      delegation: ''
-      privateEndpointNetworkPolicies: 'Enabled'
-      privateLinkServiceNetworkPolicies: 'Enabled'
-      routeTableRoutes: []
-      securityRules: []
-      serviceEndpoints: []
     }
   ]
 }
 ```
 
-**Edit `.github/workflows/deploy.yml`:**
+**Edit `main.bicep` - Update resource group name:**
 
-Update the environment variables:
+```bicep
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' existing = {
+  scope: subscription(portfolioSubscriptionId)
+  name: 'rg-yourproject-dev'  // Change this to your existing resource group name
+}
+
+module keyVault 'br:crpclazmodules.azurecr.io/res/key-vault/vault:0.1.0' =  {
+  params: {
+    name: 'kv-yourprefix-${projectName}-${environment}'  // Update prefix (max 24 chars total)
+    // ...
+  }
+}
+```
+
+**Edit `.github/workflows/deploy.yml`:**
 
 ```yaml
 env:
-  AZURE_RESOURCE_GROUP_DEV: 'rg-yourproject-dev'  # Your resource group
-  AZURE_LOCATION: 'norwayeast'                     # Your Azure region
+  AZURE_RESOURCE_GROUP_DEV: 'rg-yourproject-dev'    # Your resource group
+  AZURE_LOCATION: 'norwayeast'                       # Your Azure region
 ```
 
-### 2.3 Commit and push your changes
+#### 2.3 Commit Changes
 
 ```bash
 git add .
@@ -76,29 +100,29 @@ git commit -m "Configure for my environment"
 git push
 ```
 
-#### 3. Add GitHub Secrets
+### 3. Add GitHub Secrets
 
-You'll need a service principal with Contributor access to your Azure resource group.
+Your service principal needs **Contributor** role at the **subscription level**.
 
-1. Go to your repository on GitHub
-2. Navigate to **Settings → Secrets and variables → Actions**
-3. Click **"New repository secret"** for each of these:
+1. Go to **Settings → Secrets and variables → Actions**
+2. Add these secrets:
 
 | Secret Name | Value |
 |-------------|-------|
-| `APPLICATIONCLIENTID` | Service principal client ID |
+| `APPLICATIONCLIENTID` | Service principal application (client) ID |
 | `SECRETVALUE` | Service principal client secret |
-| `SUBSCRIPTIONID` | Your Azure subscription ID |
-| `APPLICATIONTENANTID` | Your Azure tenant ID |
+| `SUBSCRIPTIONID` | Azure subscription ID |
+| `APPLICATIONTENANTID` | Azure AD tenant ID |
 
-### 4. Deploy using Github Actions
+### 4. Deploy
 
-1. Go to your repository on GitHub
-2. Click on the **Actions** tab
-3. Select **"Deploy Azure Infrastructure as Code"** workflow
-4. Click **"Run workflow"** button
-5. Select branch (usually `main`)
-6. Click **"Run workflow"**
+**Option A: Manual trigger**
+
+1. Go to **Actions** tab
+2. Select **"Deploy Azure Infrastructure as Code"**
+3. Click **"Run workflow"**
+4. Select environment (`dev`, `test`, or `prod`)
+5. Click **"Run workflow"**
 
 **Monitor deployment:**
 - Go to the **Actions** tab to see the workflow progress
@@ -109,44 +133,71 @@ You'll need a service principal with Contributor access to your Azure resource g
 ## 📁 Repository Structure
 
 ```
-├── main.bicep                    # Main orchestration template
+├── main.bicep                           # Main orchestration template (subscription scope)
 ├── modules/
-│   └── vnet.bicep               # Virtual network module
+│   └── vnet.bicep                       # Custom VNet module (unused - using AVM)
 ├── environments/
-│   └── dev.bicepparam           # Development parameters
+│   └── dev.bicepparam                   # Development environment parameters
 └── .github/workflows/
-    └── deploy.yml               # GitHub Actions workflow
+    └── deploy.yml                       # GitHub Actions CI/CD workflow
 ```
 
 ## 🎯 What Gets Deployed
 
-- **Virtual Network** with your specified address space
-- **Network Security Groups** with default deny rules
-- **Subnets** with NSG association
+- **Virtual Network** - Using Azure Verified Module (AVM)
+- **Key Vault** - Using Azure Verified Module (AVM)
+- **Subnets** - Configurable subnets for your application tiers
 
-## ✨ Adding More Resources
+## 🔐 Key Vault Naming
 
-1. Create a new module in `modules/` (e.g., `modules/storage.bicep`)
-2. Add it to `main.bicep`:
+Key Vault names must be globally unique and max 24 characters:
+- Format: `kv-{prefix}-{projectName}-{environment}`
+- Example: `kv-myco-sandbox-dev` (18 characters)
+
+Update the prefix in `main.bicep` to ensure uniqueness.
+
+## ✨ Adding Resources
+
+### Using Azure Verified Modules (AVM)
+
+```bicep
+module storage 'br/public:avm/res/storage/storage-account:0.14.3' = {
+  scope: resourceGroup
+  name: 'storage-deploy'
+  params: {
+    name: 'st${projectName}${environment}'
+    location: location
+    tags: tags
+  }
+}
+```
+
+Browse available AVM modules: [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/)
+
+### Using Custom Modules
+
+1. Create `modules/yourmodule.bicep`
+2. Reference in `main.bicep`:
    ```bicep
-   module storage 'modules/storage.bicep' = {
-     name: 'deploy-storage'
-     params: {
-       location: location
-       tags: tags
-     }
+   module custom 'modules/yourmodule.bicep' = {
+     scope: resourceGroup
+     name: 'custom-deploy'
+     params: { ... }
    }
    ```
-3. Update `environments/dev.bicepparam` with required parameters
 
-## 🔄 Manual Deployment (Optional)
+## 🌍 Multi-Environment Setup
 
-To deploy locally instead of using GitHub Actions:
+1. Copy `environments/dev.bicepparam` to `environments/prod.bicepparam`
+2. Update values for production (different IPs, resource names, tags)
+3. Workflow supports environment selection via manual trigger
+
+## 🔄 Local Deployment
 
 ```bash
 az login
-az deployment group create \
-  --resource-group rg-yourproject-dev \
+az deployment sub create \
+  --location norwayeast \
   --template-file main.bicep \
   --parameters environments/dev.bicepparam
 ```
@@ -155,12 +206,15 @@ az deployment group create \
 
 | Issue | Solution |
 |-------|----------|
-| Authorization failed | Verify service principal has Contributor role on resource group |
-| Resource group not found | Ensure resource group exists and name matches in workflow |
-| Missing parameter error | Check all parameters in `main.bicep` have values in `.bicepparam` |
-| Workflow not triggering | Check you pushed to `main` branch |
+| Authorization failed | Service principal needs **Contributor** at **subscription** level (not just resource group) |
+| Scope mismatch | `main.bicep` uses `targetScope = 'subscription'` - ensure workflow uses `az deployment sub create` |
+| Resource group not found | Resource group must exist before deployment (referenced as `existing` in template) |
+| Key Vault name conflict | Key Vault names are globally unique - update prefix in `main.bicep` |
+| Module not found | Check module registry access - AVM modules use `br/public:`, custom registries need authentication |
 
 ## 📚 Learn More
 
 - [Bicep Documentation](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)
+- [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/)
 - [GitHub Actions for Azure](https://learn.microsoft.com/azure/developer/github/github-actions)
+- [Bicep Modules](https://learn.microsoft.com/azure/azure-resource-manager/bicep/modules)
