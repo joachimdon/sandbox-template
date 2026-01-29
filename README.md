@@ -176,12 +176,13 @@ Your service principal needs **Contributor** role at the **subscription level**.
 ### 4. Deploy
 
 **Manual trigger**
-***In your Github Repository***
-1. Go to **Actions** tab
-2. Select **"Deploy Azure Infrastructure as Code"**
-3. Click **"Run workflow"**
-4. Select environment (`dev`, `test`, or `prod`)
-5. Click **"Run workflow"**
+
+1. Go to your **Github Repo**
+2. Go to **Actions** tab
+3. Select **"Deploy Azure Infrastructure as Code"**
+4. Click **"Run workflow"**
+5. Select environment (`dev`, `test`, or `prod`)
+6. Click **"Run workflow"**
 
 **Monitor deployment:**
 - Go to the **Actions** tab to see the workflow progress
