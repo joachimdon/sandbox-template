@@ -60,7 +60,7 @@ module vnet 'br:crpclazmodules.azurecr.io/ptn/virtual-network:0.2.0' = {
 
 
 
-module keyVault 'br:crpclazmodules.azurecr.io/res/key-vault/vault:0.0.5' =  {
+module keyVault 'br:crpclazmodules.azurecr.io/res/key-vault/vault:0.1.0' =  {
   scope: resourceGroup
   name : 'keyvault-deploy'
   params: {
