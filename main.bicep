@@ -41,6 +41,7 @@ module vnet 'br/public:avm/res/network/virtual-network:0.7.2' = {
     name: 'vnet-${projectName}-${environment}'
     addressPrefixes: vnetParam.addressPrefixes
     subnets: vnetParam.subnets
+    location: location
     tags: tags
   }
 }
@@ -51,7 +52,9 @@ module keyVault 'br:crpclazmodules.azurecr.io/res/key-vault/vault:0.1.0' =  {
   scope: resourceGroup
   name : 'keyvault-deploy'
   params: {
-    name: 'kv-${projectName}-${environment}'
+    name: 'kv-aa387-${projectName}-${environment}'
     tags: {}
+    location: location
+    sku: 'standard'
   }
 }
