@@ -53,7 +53,7 @@ module keyVault 'br:crpclazmodules.azurecr.io/res/key-vault/vault:0.1.0' =  {
   name : 'keyvault-deploy'
   params: {
     name: 'kv-aa387-${projectName}-${environment}'
-    tags: {}
+    tags: tags
     location: location
     sku: 'standard'
   }
