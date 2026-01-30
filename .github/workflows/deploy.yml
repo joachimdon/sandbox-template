@@ -30,9 +30,9 @@ on:
           - test
 run-name: Azure Validate and Deploy @ ${{ inputs.environment }}
 env:
-  AZURE_RESOURCE_GROUP_DEV: 'rg-aa387-sandbox'
-  AZURE_RESOURCE_GROUP_PROD: 'rg-aa387-sandbox'
-  AZURE_RESOURCE_GROUP_TEST: 'rg-aa387-sandbox'
+  AZURE_RESOURCE_GROUP_DEV: 'rg-xxx-sandbox'
+  AZURE_RESOURCE_GROUP_PROD: 'rg-xxx-sandbox'
+  AZURE_RESOURCE_GROUP_TEST: 'rg-xxx-sandbox'
   AZURE_LOCATION: 'norwayeast'
 
 jobs:

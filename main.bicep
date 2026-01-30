@@ -31,7 +31,7 @@ param defaultNsgRules array
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' existing = {
   scope: subscription(portfolioSubscriptionId)
-  name: 'rg-aa387-sandbox'
+  name: 'rg-xxx-sandbox'
 }
 
 module vnet 'br/public:avm/res/network/virtual-network:0.7.2' = {
@@ -52,7 +52,7 @@ module keyVault 'br:crpclazmodules.azurecr.io/res/key-vault/vault:0.1.0' =  {
   scope: resourceGroup
   name : 'keyvault-deploy'
   params: {
-    name: 'kv-aa387-${projectName}-${environment}'
+    name: 'kv-xxx-${projectName}-${environment}'
     tags: tags
     location: location
     sku: 'standard'
